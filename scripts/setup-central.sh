@@ -42,10 +42,11 @@ chmod 600 "$CENTRAL_DIR/.env"
 echo ""
 echo "✓ Generated $CENTRAL_DIR/.env"
 
-# ── 3. Update domain in nginx.conf ────────────────────────────────────
+# ── 3. Update configurations ──────────────────────────────────────────
 sed -i "s/grafana\.mdrezaulkarim\.com/${DOMAIN}/g" "$CENTRAL_DIR/nginx.conf"
 sed -i "s/monitor\.yourdomain\.com/${DOMAIN}/g" "$CENTRAL_DIR/nginx.conf"
-echo "✓ Updated domain in nginx.conf"
+sed -i "s|\${ALERTMANAGER_WEBHOOK_URL}|${ALERTMANAGER_WEBHOOK_URL}|g" "$CENTRAL_DIR/alertmanager.yml"
+echo "✓ Updated domain in nginx.conf and webhook in alertmanager.yml"
 
 # ── 4. Set up TLS certificate ─────────────────────────────────────────
 echo ""
