@@ -182,10 +182,48 @@ Grafana automatically provisions the following dashboards under the `Monitoring`
 
 ---
 
+## 🛠️ Troubleshooting & Local/IP Testing
+
+If you are testing the installation using your server's IP address directly (without pointing a domain name first) or ran into syntax conflicts during setup, use the following commands:
+
+### 1. Discard local git conflicts & pull latest code
+If your git pulls are aborted due to local changes (e.g., executing setup scripts creates local changes/permissions issues):
+```bash
+git checkout scripts/setup-central.sh scripts/configure-firewall.sh "Mother Server/docker-compose.yml"
+git pull
+```
+
+### 2. Configure Firewall (UFW)
+To automatically configure ports including HTTP/HTTPS, SSH, and direct monitoring access (3000, 9090, 3100, 9093):
+```bash
+chmod +x scripts/configure-firewall.sh
+sudo ./scripts/configure-firewall.sh
+```
+
+### 3. Expose ports on Server IP & run local setup
+If you do not have a domain pointed yet, run the central configuration wizard using the server IP when prompted for the domain:
+```bash
+chmod +x scripts/setup-central.sh
+sudo ./scripts/setup-central.sh
+# Type your Server's Public IP (or localhost) for the domain.
+# A self-signed fallback SSL certificate will be automatically generated to avoid Nginx startup crashes.
+```
+
+### 4. Pull Latest Stack & Restart
+To fetch the latest docker image versions (`latest` tags) and restart clean:
+```bash
+cd "Mother Server"
+docker compose pull
+docker compose up -d --remove-orphans
+```
+
+---
+
 ## 📝 Changelog
 
 | Version | Date       | Changes |
 |---------|------------|---------|
+| `1.1.0` | 2026-07-06 | Simplified UFW comments to prevent syntax parsing errors, added automatic self-signed SSL fallback for IP-based local testing, updated all stack images to `latest`, and exposed UI/metrics ports publicly. |
 | `1.0.0` | 2026-07-05 | Initial release with centralized Mother Server stack, auto-provisioned dashboards, and standalone Hostinger / Server 3 agents |
 
 ---
