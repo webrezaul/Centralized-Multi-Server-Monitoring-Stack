@@ -3,7 +3,7 @@ services:
   #  PROMETHEUS — central metrics store, receives remote_write from agents
   # ═══════════════════════════════════════════════════════════════════
   prometheus:
-    image: prom/prometheus:v2.54.0
+    image: prom/prometheus:latest
     container_name: prometheus
     restart: unless-stopped
     command:
@@ -36,7 +36,7 @@ services:
   #  LOKI — central log aggregation, receives push from Promtail agents
   # ═══════════════════════════════════════════════════════════════════
   loki:
-    image: grafana/loki:2.9.4
+    image: grafana/loki:latest
     container_name: loki
     restart: unless-stopped
     command: -config.file=/etc/loki/local-config.yaml
@@ -60,7 +60,7 @@ services:
   #  ALERTMANAGER — routes alerts to Teams/Power Automate webhook
   # ═══════════════════════════════════════════════════════════════════
   alertmanager:
-    image: prom/alertmanager:v0.27.0
+    image: prom/alertmanager:latest
     container_name: alertmanager
     restart: unless-stopped
     command:
@@ -83,7 +83,7 @@ services:
   #  GRAFANA — dashboards & visualization, auto-provisions datasources
   # ═══════════════════════════════════════════════════════════════════
   grafana:
-    image: grafana/grafana:11.1.0
+    image: grafana/grafana:latest
     container_name: grafana
     restart: unless-stopped
     environment:
@@ -114,7 +114,7 @@ services:
   #  NGINX — TLS reverse proxy, only public-facing service
   # ═══════════════════════════════════════════════════════════════════
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:latest
     container_name: monitoring-proxy
     restart: unless-stopped
     volumes:
@@ -143,7 +143,7 @@ services:
   #  NODE EXPORTER — collects mother server system metrics
   # ═══════════════════════════════════════════════════════════════════
   node-exporter:
-    image: prom/node-exporter:v1.8.1
+    image: prom/node-exporter:latest
     container_name: node-exporter
     restart: unless-stopped
     command:
@@ -163,7 +163,7 @@ services:
   #  CADVISOR — collects mother server container metrics
   # ═══════════════════════════════════════════════════════════════════
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     restart: unless-stopped
     volumes:
@@ -186,7 +186,7 @@ services:
   #  PROMTAIL — collects mother server logs and pushes to local Loki
   # ═══════════════════════════════════════════════════════════════════
   promtail:
-    image: grafana/promtail:2.9.4
+    image: grafana/promtail:latest
     container_name: promtail
     restart: unless-stopped
     command: -config.file=/etc/promtail/config.yml

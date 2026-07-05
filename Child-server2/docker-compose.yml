@@ -6,7 +6,7 @@
 services:
   # ── Node Exporter — system metrics (CPU, memory, disk, network) ─────
   node-exporter:
-    image: prom/node-exporter:v1.8.1
+    image: prom/node-exporter:latest
     container_name: node-exporter
     restart: unless-stopped
     command:
@@ -22,7 +22,7 @@ services:
 
   # ── cAdvisor — per-container metrics (CPU, memory, network I/O) ─────
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     restart: unless-stopped
     volumes:
@@ -41,7 +41,7 @@ services:
 
   # ── Prometheus Agent — scrapes local exporters, pushes to central ───
   prometheus-agent:
-    image: prom/prometheus:v2.54.0
+    image: prom/prometheus:latest
     container_name: prometheus-agent
     restart: unless-stopped
     command:
@@ -64,7 +64,7 @@ services:
 
   # ── Promtail — ships logs to Loki on the central hub ────────────────
   promtail:
-    image: grafana/promtail:2.9.4
+    image: grafana/promtail:latest
     container_name: promtail
     restart: unless-stopped
     command: -config.file=/etc/promtail/config.yml
