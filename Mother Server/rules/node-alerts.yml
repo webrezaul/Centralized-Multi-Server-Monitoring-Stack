@@ -1,0 +1,76 @@
+# ─── Prometheus Alerting Rules: Host / Node-Level ─────────────────────
+# These rules fire when node_exporter metrics indicate problems.
+# Every alert carries a "server" label from the agent's external_labels,
+# so Alertmanager can group notifications per server.
+
+groups:
+  - name: node_alerts
+    rules:
+
+      # ── Server stopped reporting metrics ────────────────────────────
+      # Push-based: we can't use `up == 0`, so we check for absence
+      - alert: HostDown
+        expr: absent_over_time(node_load1[10m])
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Server {{ $labels.server }} is down"
+          description: "No node_exporter metrics received from {{ $labels.server }} for 10 minutes."
+
+      # ── CPU load exceeds number of cores ────────────────────────────
+      - alert: HostHighCpuLoad
+        expr: >
+          node_load1
+          > on(server)
+          count by (server) (node_cpu_seconds_total{mode="idle"})
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU load on {{ $labels.server }}"
+          description: "1-minute load average ({{ $value | printf \"%.1f\" }}) exceeds core count on {{ $labels.server }}."
+
+      # ── Memory usage above 85% ─────────────────────────────────────
+      - alert: HostHighMemoryUsage
+        expr: >
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.server }}"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}% on {{ $labels.server }}."
+
+      # ── Disk usage above 85% ────────────────────────────────────────
+      - alert: HostDiskAlmostFull
+        expr: >
+          (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk almost full on {{ $labels.server }}"
+          description: "{{ $labels.mountpoint }} is {{ $value | printf \"%.1f\" }}% full on {{ $labels.server }}."
+
+      # ── Predictive: disk will fill within 24 hours ──────────────────
+      - alert: HostDiskWillFillIn24h
+        expr: >
+          predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}[6h], 24*3600) < 0
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk on {{ $labels.server }} predicted to fill within 24h"
+          description: "{{ $labels.mountpoint }} on {{ $labels.server }} is projected to run out of space within 24 hours based on the last 6h trend."
+
+      # ── High network errors ─────────────────────────────────────────
+      - alert: HostNetworkErrors
+        expr: >
+          rate(node_network_receive_errs_total[5m]) + rate(node_network_transmit_errs_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Network errors on {{ $labels.server }}"
+          description: "Interface {{ $labels.device }} on {{ $labels.server }} is seeing {{ $value | printf \"%.1f\" }} errors/sec."

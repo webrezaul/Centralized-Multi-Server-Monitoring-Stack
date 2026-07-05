@@ -1,0 +1,52 @@
+# ─── Promtail — Hostinger VPS ─────────────────────────────────────────
+# Ships system logs and Docker container logs to central Loki
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: 'https://grafana.mdrezaulkarim.com/loki/api/v1/push'
+    basic_auth:
+      username: 'agent_user'
+      password: 'CHANGE_ME'
+    batchwait: 1s
+    batchsize: 1048576
+
+scrape_configs:
+  - job_name: system
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: varlogs
+          server: 'hostinger-1'
+          __path__: /var/log/*.log
+
+  - job_name: syslog
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: syslog
+          server: 'hostinger-1'
+          __path__: /var/log/syslog
+
+  - job_name: auth
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: auth
+          server: 'hostinger-1'
+          __path__: /var/log/auth.log
+
+  - job_name: docker
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: docker
+          server: 'hostinger-1'
+          __path__: /var/lib/docker/containers/*/*.log
+    pipeline_stages:
+      - docker: {}

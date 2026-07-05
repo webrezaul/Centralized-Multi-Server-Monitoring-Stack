@@ -1,0 +1,30 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: teams-webhook
+  group_by: ['alertname', 'server']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+  # Route critical alerts to a shorter repeat interval
+  routes:
+    - match:
+        severity: critical
+      receiver: teams-webhook
+      repeat_interval: 1h
+
+receivers:
+  - name: teams-webhook
+    webhook_configs:
+      - url: '${ALERTMANAGER_WEBHOOK_URL}'
+        send_resolved: true
+
+# Silence noisy alerts during planned maintenance windows
+# inhibit_rules:
+#   - source_match:
+#       alertname: 'HostDown'
+#     target_match_re:
+#       alertname: 'Host.*'
+#     equal: ['server']

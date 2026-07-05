@@ -1,0 +1,52 @@
+# ─── Prometheus Alerting Rules: Container-Level (cAdvisor) ────────────
+# These rules fire based on cAdvisor metrics from Docker containers.
+
+groups:
+  - name: container_alerts
+    rules:
+
+      # ── Container CPU usage sustained above 80% ─────────────────────
+      - alert: ContainerHighCpu
+        expr: >
+          rate(container_cpu_usage_seconds_total{name!=""}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} high CPU on {{ $labels.server }}"
+          description: "Container {{ $labels.name }} on {{ $labels.server }} is using {{ $value | printf \"%.1f\" }}% CPU."
+
+      # ── Container memory above 80% of its limit ─────────────────────
+      - alert: ContainerHighMemory
+        expr: >
+          (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) * 100 > 80
+          and container_spec_memory_limit_bytes{name!=""} > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} high memory on {{ $labels.server }}"
+          description: "Container {{ $labels.name }} on {{ $labels.server }} is using {{ $value | printf \"%.1f\" }}% of its memory limit."
+
+      # ── Container restarting frequently ─────────────────────────────
+      - alert: ContainerRestarting
+        expr: >
+          increase(container_last_seen{name!=""}[15m]) == 0
+          and increase(container_start_time_seconds{name!=""}[15m]) > 3
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container {{ $labels.name }} restarting on {{ $labels.server }}"
+          description: "Container {{ $labels.name }} on {{ $labels.server }} has restarted more than 3 times in the last 15 minutes."
+
+      # ── Container stopped unexpectedly ──────────────────────────────
+      - alert: ContainerStopped
+        expr: >
+          absent_over_time(container_last_seen{name!=""}[10m])
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container {{ $labels.name }} stopped on {{ $labels.server }}"
+          description: "Container {{ $labels.name }} on {{ $labels.server }} has not been seen for 10 minutes."

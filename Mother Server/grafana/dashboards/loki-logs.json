@@ -1,0 +1,187 @@
+{
+  "annotations": { "list": [] },
+  "description": "Centralized log viewer powered by Loki — filter by server, job, and search text",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "Log Volume",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "gradientMode": "opacity",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": { "group": "A", "mode": "normal" }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "right", "sortBy": "Total", "sortDesc": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "Log Volume by Server",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (server) (count_over_time({server=~\"$server\", job=~\"$job\"} |~ \"$search\" [$__interval]))",
+          "legendFormat": "{{ server }}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "gradientMode": "opacity",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": { "group": "A", "mode": "normal" }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 7 },
+      "id": 2,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "right", "sortBy": "Total", "sortDesc": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "Log Volume by Job",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (job) (count_over_time({server=~\"$server\", job=~\"$job\"} |~ \"$search\" [$__interval]))",
+          "legendFormat": "{{ job }}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
+      "id": 101,
+      "title": "Log Stream",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "" },
+      "gridPos": { "h": 20, "w": 24, "x": 0, "y": 14 },
+      "id": 3,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "title": "Logs",
+      "type": "logs",
+      "targets": [
+        {
+          "expr": "{server=~\"$server\", job=~\"$job\"} |~ \"$search\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 34 },
+      "id": 102,
+      "title": "Error Logs Only",
+      "type": "row",
+      "panels": [
+        {
+          "datasource": { "type": "loki", "uid": "" },
+          "gridPos": { "h": 16, "w": 24, "x": 0, "y": 35 },
+          "id": 4,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "showLabels": true,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "title": "Error / Critical / Fatal Logs",
+          "type": "logs",
+          "targets": [
+            {
+              "expr": "{server=~\"$server\", job=~\"$job\"} |~ \"(?i)(error|critical|fatal|panic|exception)\"",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["loki", "logs", "monitoring"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": { "type": "loki", "uid": "" },
+        "definition": "label_values(server)",
+        "includeAll": true,
+        "multi": true,
+        "name": "server",
+        "query": "label_values(server)",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": { "type": "loki", "uid": "" },
+        "definition": "label_values({server=~\"$server\"}, job)",
+        "includeAll": true,
+        "multi": true,
+        "name": "job",
+        "query": "label_values({server=~\"$server\"}, job)",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": { "selected": false, "text": "", "value": "" },
+        "name": "search",
+        "options": [{ "selected": true, "text": "", "value": "" }],
+        "query": "",
+        "type": "textbox",
+        "label": "Search"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Loki — Centralized Logs",
+  "uid": "loki-centralized-logs",
+  "version": 1
+}

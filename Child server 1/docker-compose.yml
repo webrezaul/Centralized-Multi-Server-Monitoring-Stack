@@ -1,0 +1,88 @@
+version: "3.8"
+
+# ═══════════════════════════════════════════════════════════════════════
+#  AGENT STACK — Hostinger VPS
+#  Collects system metrics, container metrics, and logs, then pushes
+#  everything to the central hub at grafana.mdrezaulkarim.com
+# ═══════════════════════════════════════════════════════════════════════
+
+services:
+  # ── Node Exporter — system metrics (CPU, memory, disk, network) ─────
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: node-exporter
+    restart: unless-stopped
+    command:
+      - "--path.rootfs=/host"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    volumes:
+      - /:/host:ro,rslave
+    ports:
+      - "127.0.0.1:9100:9100"
+    networks:
+      - agent
+    pid: host
+
+  # ── cAdvisor — per-container metrics (CPU, memory, network I/O) ─────
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "127.0.0.1:8080:8080"
+    networks:
+      - agent
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+
+  # ── Prometheus Agent — scrapes local exporters, pushes to central ───
+  prometheus-agent:
+    image: prom/prometheus:v2.54.0
+    container_name: prometheus-agent
+    restart: unless-stopped
+    command:
+      - "--enable-feature=agent"
+      - "--config.file=/etc/prometheus/prometheus-agent.yml"
+      - "--storage.agent.path=/prometheus"
+    volumes:
+      - ./prometheus-agent.yml:/etc/prometheus/prometheus-agent.yml:ro
+      - agent_data:/prometheus
+    networks:
+      - agent
+    depends_on:
+      - node-exporter
+      - cadvisor
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── Promtail — ships logs to Loki on the central hub ────────────────
+  promtail:
+    image: grafana/promtail:2.9.4
+    container_name: promtail
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - promtail_positions:/tmp
+    networks:
+      - agent
+
+networks:
+  agent:
+    driver: bridge
+
+volumes:
+  agent_data:
+  promtail_positions:

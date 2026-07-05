@@ -1,0 +1,52 @@
+# ─── Promtail Config for Mother Server ──────────────────────────────────
+# Ships mother server system logs and Docker container logs directly to local Loki.
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: 'http://loki:3100/loki/api/v1/push'   # direct network connection inside Docker
+    batchwait: 1s
+    batchsize: 1048576
+
+scrape_configs:
+  # ── System logs (/var/log/*.log) ────────────────────────────────────
+  - job_name: system
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: varlogs
+          server: 'mother-server'
+          __path__: /var/log/*.log
+
+  # ── Syslog / auth log ──────────────────────────────────────────────
+  - job_name: syslog
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: syslog
+          server: 'mother-server'
+          __path__: /var/log/syslog
+
+  - job_name: auth
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: auth
+          server: 'mother-server'
+          __path__: /var/log/auth.log
+
+  # ── Docker container logs ───────────────────────────────────────────
+  - job_name: docker
+    static_configs:
+      - targets: ['localhost']
+        labels:
+          job: docker
+          server: 'mother-server'
+          __path__: /var/lib/docker/containers/*/*.log
+    pipeline_stages:
+      - docker: {}     # Parse Docker JSON log format
