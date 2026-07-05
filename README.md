@@ -177,8 +177,24 @@ docker compose up -d
 Grafana automatically provisions the following dashboards under the `Monitoring` folder:
 - **Multi-Server Overview**: Visual health index comparing CPU, RAM, Disk, and containers across all 3 servers side-by-side.
 - **Node Exporter — System Metrics**: Core hardware details (Uptime, Disk IO, Network, Load) filterable by server.
+- **Node Exporter Full** ([ID: 1860](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)): Highly detailed, community-standard system metrics dashboard.
 - **Docker Overview — Container Metrics**: Deep resource tracking of individual containers per server.
 - **Loki — Centralized Logs**: Live stream visualizer for container and system logs (`/var/log/*`).
+
+### 🎨 Customizing & Adding Dashboards
+
+You can easily customize existing dashboards or import new ones from the [Grafana Dashboards Library](https://grafana.com/grafana/dashboards/):
+
+1. **Add a New Dashboard**:
+   Download the JSON file for the dashboard you want (for example, the [Node Exporter Full (1860)](https://grafana.com/grafana/dashboards/1860-node-exporter-full/) dashboard) and save it under the `Mother Server/grafana/dashboards/` directory:
+   ```bash
+   # Example: Download dashboard 1860 directly into the dashboards directory
+   curl -sL "https://grafana.com/api/dashboards/1860/revisions/latest/download" -o "Mother Server/grafana/dashboards/node-exporter-full.json"
+   ```
+2. **Auto-Provisioning**:
+   Grafana scans the `dashboards/` directory every 30 seconds. Any JSON dashboard placed here will automatically appear in your Grafana `Monitoring` folder.
+3. **Save UI Customizations**:
+   If you customize a dashboard within the Grafana UI, make sure to export the JSON from Grafana and save it back to `Mother Server/grafana/dashboards/` to make your changes persistent across container restarts.
 
 ---
 
