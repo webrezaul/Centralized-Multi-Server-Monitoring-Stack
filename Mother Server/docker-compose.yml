@@ -19,7 +19,7 @@ services:
       - ./rules:/etc/prometheus/rules:ro
       - prometheus_data:/prometheus
     ports:
-      - "127.0.0.1:9090:9090"
+      - "9090:9090"
     networks:
       - monitoring
     healthcheck:
@@ -43,7 +43,7 @@ services:
     volumes:
       - loki_data:/loki
     ports:
-      - "127.0.0.1:3100:3100"
+      - "3100:3100"
     networks:
       - monitoring
     healthcheck:
@@ -70,7 +70,7 @@ services:
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager_data:/alertmanager
     ports:
-      - "127.0.0.1:9093:9093"
+      - "9093:9093"
     networks:
       - monitoring
     healthcheck:
@@ -97,7 +97,7 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     ports:
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
     networks:
       - monitoring
     healthcheck:

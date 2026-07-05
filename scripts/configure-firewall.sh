@@ -46,6 +46,12 @@ case "$SERVER_TYPE" in
       ufw allow 80/tcp comment 'HTTP'
       ufw allow 443/tcp comment 'HTTPS'
       
+      # Allow direct access ports
+      ufw allow 3000/tcp comment 'Grafana'
+      ufw allow 9090/tcp comment 'Prometheus'
+      ufw allow 3100/tcp comment 'Loki'
+      ufw allow 9093/tcp comment 'Alertmanager'
+      
       # Enable UFW if disabled
       if ! ufw status | grep -q "active"; then
         echo "⚠️  UFW is currently disabled. Enabling it..."
@@ -57,12 +63,16 @@ case "$SERVER_TYPE" in
       firewall-cmd --permanent --add-service=ssh
       firewall-cmd --permanent --add-service=http
       firewall-cmd --permanent --add-service=https
+      firewall-cmd --permanent --add-port=3000/tcp
+      firewall-cmd --permanent --add-port=9090/tcp
+      firewall-cmd --permanent --add-port=3100/tcp
+      firewall-cmd --permanent --add-port=9093/tcp
       firewall-cmd --reload
       firewall-cmd --list-all
     fi
     echo ""
     echo "✅ Mother Server firewall configured successfully."
-    echo "   Opened ports: 22 (SSH), 80 (HTTP), 443 (HTTPS)."
+    echo "   Opened ports: 22 (SSH), 80 (HTTP), 443 (HTTPS), 3000 (Grafana), 9090 (Prometheus), 3100 (Loki), 9093 (Alertmanager)."
     ;;
 
   2)
