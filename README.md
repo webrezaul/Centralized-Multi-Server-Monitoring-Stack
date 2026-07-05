@@ -8,13 +8,13 @@ A centralized, push-based monitoring system built on a **Mother Server** (AWS) p
 
 | Technology   | Version   | Purpose                                                        |
 |--------------|-----------|----------------------------------------------------------------|
-| **Grafana**  | `11.1.0`  | Centralized visualization and alerting dashboard UI            |
-| **Prometheus**| `v2.54.0` | Metrics collection engine (Mother server runs database; Agents run agent mode) |
-| **Loki**     | `2.9.4`   | Log aggregation store on Mother Server                        |
-| **Promtail** | `2.9.4`   | Log shipper parsing and forwarding container/system logs      |
-| **Nginx**    | `1.27`    | Hardened proxy handling HTTPS TLS encryption and basic auth    |
-| **cAdvisor** | `v0.49.1` | Container resource monitoring (CPU, RAM, network, disk)        |
-| **Node Exporter**| `v1.8.1`| Hardware and OS metrics exporter                              |
+| **Grafana**  | `latest`  | Centralized visualization and alerting dashboard UI            |
+| **Prometheus**| `latest`  | Metrics collection engine (Mother server runs database; Agents run agent mode) |
+| **Loki**     | `latest (v3.x)` | Log aggregation store on Mother Server                        |
+| **Promtail** | `latest (v3.x)` | Log shipper parsing and forwarding container/system logs      |
+| **Nginx**    | `latest`  | Hardened proxy handling HTTPS TLS encryption and basic auth    |
+| **cAdvisor** | `latest`  | Container resource monitoring (CPU, RAM, network, disk)        |
+| **Node Exporter**| `latest`| Hardware and OS metrics exporter                              |
 
 ---
 
@@ -67,7 +67,7 @@ Before deployment, make sure the following are set up:
   sudo ./scripts/install-docker.sh
   ```
 - **DNS record** pointing `grafana.mdrezaulkarim.com` to your Mother Server's public IP.
-- Inbound security groups on Mother Server: Open ports **80** and **443** (no other ports need public exposure).
+- Inbound security groups on Mother Server: Open ports **80** (HTTP), **443** (HTTPS), **3000** (Grafana UI), **9090** (Prometheus), **3100** (Loki), and **9093** (Alertmanager) to allow direct admin access and remote agent ingestion.
 
 ---
 
@@ -82,7 +82,7 @@ sudo ./scripts/configure-firewall.sh
 
 | Server Type | Required Inbound Ports | Purpose |
 |-------------|-------------------------|---------|
-| **Mother Server (AWS)** | `22/tcp` (SSH), `80/tcp` (HTTP), `443/tcp` (HTTPS) | SSH access, Let's Encrypt TLS renewal, and Grafana / Ingestion APIs |
+| **Mother Server (AWS)** | `22/tcp` (SSH), `80/tcp` (HTTP), `443/tcp` (HTTPS), `3000/tcp` (Grafana), `9090/tcp` (Prometheus), `3100/tcp` (Loki), `9093/tcp` (Alertmanager) | SSH access, Let's Encrypt TLS renewal, Grafana web UI, and direct API access for metrics/logs ingestion. |
 | **Agent Servers** | `22/tcp` (SSH) only | SSH access. *No inbound ports are needed for monitoring (outbound push only)* |
 
 ---
@@ -239,6 +239,7 @@ docker compose up -d --remove-orphans
 
 | Version | Date       | Changes |
 |---------|------------|---------|
+| `1.2.0` | 2026-07-06 | Upgraded Loki to v3.x configuration, simplified Loki configurations removing deprecated options, removed Loki container healthcheck to resolve startup loops, adjusted Nginx dependencies to start Loki services correctly, added pre-provisioned Node Exporter Full dashboard (ID: 1860), and documented custom dashboard management guide. |
 | `1.1.0` | 2026-07-06 | Simplified UFW comments to prevent syntax parsing errors, added automatic self-signed SSL fallback for IP-based local testing, updated all stack images to `latest`, and exposed UI/metrics ports publicly. |
 | `1.0.0` | 2026-07-05 | Initial release with centralized Mother Server stack, auto-provisioned dashboards, and standalone Hostinger / Server 3 agents |
 
