@@ -70,6 +70,24 @@ else
     mkdir -p "$CENTRAL_DIR/certs"
 fi
 
+# Fallback: Generate self-signed SSL certificates if none exist, so Nginx doesn't crash
+if [ ! -f "$CENTRAL_DIR/certs/fullchain.pem" ] || [ ! -f "$CENTRAL_DIR/certs/privkey.pem" ]; then
+    echo ""
+    echo "⚠️  No SSL certificates found in $CENTRAL_DIR/certs/"
+    if command -v openssl &>/dev/null; then
+        echo "⚙️  Generating temporary self-signed SSL certificates so Nginx can start..."
+        mkdir -p "$CENTRAL_DIR/certs"
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout "$CENTRAL_DIR/certs/privkey.pem" \
+            -out "$CENTRAL_DIR/certs/fullchain.pem" \
+            -subj "/CN=${DOMAIN}"
+        chmod 644 "$CENTRAL_DIR/certs/"*.pem
+        echo "✓ Generated self-signed certificates."
+    else
+        echo "❌ Error: openssl not found. Cannot generate temporary SSL certificates."
+    fi
+fi
+
 # ── 5. Create htpasswd file ───────────────────────────────────────────
 echo ""
 echo "── Basic Auth Setup ───────────────────────────────────────────"
