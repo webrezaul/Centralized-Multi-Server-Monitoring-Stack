@@ -16,13 +16,6 @@ common:
     kvstore:
       store: inmemory
 
-query_range:
-  results_cache:
-    cache:
-      embedded_cache:
-        enabled: true
-        max_size_mb: 100
-
 schema_config:
   configs:
     - from: 2020-10-24
@@ -32,10 +25,6 @@ schema_config:
       index:
         prefix: index_
         period: 24h
-
-limits_config:
-  metric_aggregation_enabled: false # Disable query aggregation to prevent startup warnings/errors on some Loki 3.x builds
-  enable_multi_variant_queries: true
 
 ruler:
   alertmanager_url: http://alertmanager:9093
