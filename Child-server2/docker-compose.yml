@@ -1,7 +1,4 @@
-version: "3.8"
-
-# ═══════════════════════════════════════════════════════════════════════
-#  AGENT STACK — Server 3 (Generic VPS)
+# ─── AGENT STACK — Server 3 (Generic VPS)
 #  Collects system metrics, container metrics, and logs, then pushes
 #  everything to the central hub at grafana.mdrezaulkarim.com
 # ═══════════════════════════════════════════════════════════════════════

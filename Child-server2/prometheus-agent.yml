@@ -4,7 +4,7 @@
 global:
   scrape_interval: 15s
   external_labels:
-    server: 'server-3'
+    server: '${SERVER_NAME}'
 
 scrape_configs:
   - job_name: 'node-exporter'
@@ -16,10 +16,10 @@ scrape_configs:
       - targets: ['cadvisor:8080']
 
 remote_write:
-  - url: 'https://grafana.mdrezaulkarim.com/api/v1/write'
+  - url: '${CENTRAL_URL}/api/v1/write'
     basic_auth:
-      username: 'agent_user'
-      password: 'CHANGE_ME'
+      username: '${AUTH_USER}'
+      password: '${AUTH_PASS}'
     queue_config:
       max_samples_per_send: 5000
       batch_send_deadline: 5s

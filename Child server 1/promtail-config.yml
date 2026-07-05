@@ -9,10 +9,10 @@ positions:
   filename: /tmp/positions.yaml
 
 clients:
-  - url: 'https://grafana.mdrezaulkarim.com/loki/api/v1/push'
+  - url: '${CENTRAL_URL}/loki/api/v1/push'
     basic_auth:
-      username: 'agent_user'
-      password: 'CHANGE_ME'
+      username: '${AUTH_USER}'
+      password: '${AUTH_PASS}'
     batchwait: 1s
     batchsize: 1048576
 
@@ -22,7 +22,7 @@ scrape_configs:
       - targets: ['localhost']
         labels:
           job: varlogs
-          server: 'hostinger-1'
+          server: '${SERVER_NAME}'
           __path__: /var/log/*.log
 
   - job_name: syslog
@@ -30,7 +30,7 @@ scrape_configs:
       - targets: ['localhost']
         labels:
           job: syslog
-          server: 'hostinger-1'
+          server: '${SERVER_NAME}'
           __path__: /var/log/syslog
 
   - job_name: auth
@@ -38,7 +38,7 @@ scrape_configs:
       - targets: ['localhost']
         labels:
           job: auth
-          server: 'hostinger-1'
+          server: '${SERVER_NAME}'
           __path__: /var/log/auth.log
 
   - job_name: docker
@@ -46,7 +46,7 @@ scrape_configs:
       - targets: ['localhost']
         labels:
           job: docker
-          server: 'hostinger-1'
+          server: '${SERVER_NAME}'
           __path__: /var/lib/docker/containers/*/*.log
     pipeline_stages:
       - docker: {}

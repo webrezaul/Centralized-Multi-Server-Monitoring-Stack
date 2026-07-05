@@ -43,7 +43,7 @@ case "$SERVER_TYPE" in
     if [ "$FIREWALL_TOOL" = "ufw" ]; then
       # Allow standard ports
       ufw allow 22/tcp comment 'SSH'
-      ufw allow 80/tcp comment 'HTTP (Let Let\'s Encrypt Challenge)'
+      ufw allow 80/tcp comment "HTTP (Let's Encrypt Challenge)"
       ufw allow 443/tcp comment 'HTTPS (Grafana UI & Agent ingestion)'
       
       # Enable UFW if disabled

@@ -43,6 +43,7 @@ echo ""
 echo "✓ Generated $CENTRAL_DIR/.env"
 
 # ── 3. Update domain in nginx.conf ────────────────────────────────────
+sed -i "s/grafana\.mdrezaulkarim\.com/${DOMAIN}/g" "$CENTRAL_DIR/nginx.conf"
 sed -i "s/monitor\.yourdomain\.com/${DOMAIN}/g" "$CENTRAL_DIR/nginx.conf"
 echo "✓ Updated domain in nginx.conf"
 
