@@ -45,7 +45,7 @@ services:
     container_name: prometheus-agent
     restart: unless-stopped
     command:
-      - "--enable-feature=agent"
+      - "--agent"
       - "--config.file=/etc/prometheus/prometheus-agent.yml"
       - "--storage.agent.path=/prometheus"
     volumes:
