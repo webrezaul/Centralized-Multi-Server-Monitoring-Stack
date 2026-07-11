@@ -2,6 +2,9 @@
 
 A centralized, push-based monitoring system built on a **Mother Server** (AWS) pulling metrics and logs from **Hostinger VPS** and **Server 3** satellite hosts.
 
+> [!TIP]
+> Check out the [Troubleshooting & Verification Walkthrough](walkthrough.md) for step-by-step setup details, troubleshooting steps for cAdvisor and Prometheus Agent, success logs, and Grafana screenshot validations.
+
 ---
 
 ## 📦 Stack / Tech Used
