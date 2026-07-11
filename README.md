@@ -115,6 +115,14 @@ chmod +x scripts/setup-central.sh
 
 *This script generates your `.env` file, fetches Let's Encrypt certificates, creates the basic auth password file, and runs the stack.*
 
+#### 🔒 Installing/Renewing Let's Encrypt SSL Certificates:
+To automate installing, renewing, and copying SSL certificates, run the dedicated SSL script:
+```bash
+chmod +x scripts/setup-ssl.sh
+sudo ./scripts/setup-ssl.sh
+```
+*This script checks and installs Certbot, stops the Nginx proxy container if running (to free port 80), requests the certificate from Let's Encrypt, provisions it in `Mother Server/certs/`, and restarts the Nginx proxy container.*
+
 If configuring manually:
 ```bash
 # Obtain Let's Encrypt certificates
