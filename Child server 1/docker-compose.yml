@@ -44,10 +44,16 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus-agent
     restart: unless-stopped
+    environment:
+      - SERVER_NAME=${SERVER_NAME}
+      - CENTRAL_URL=${CENTRAL_URL}
+      - AUTH_USER=${AUTH_USER}
+      - AUTH_PASS=${AUTH_PASS}
     command:
       - "--agent"
       - "--config.file=/etc/prometheus/prometheus-agent.yml"
       - "--storage.agent.path=/prometheus"
+      - "--config.expand-env"
     volumes:
       - ./prometheus-agent.yml:/etc/prometheus/prometheus-agent.yml:ro
       - agent_data:/prometheus
@@ -67,7 +73,14 @@ services:
     image: grafana/promtail:latest
     container_name: promtail
     restart: unless-stopped
-    command: -config.file=/etc/promtail/config.yml
+    environment:
+      - SERVER_NAME=${SERVER_NAME}
+      - CENTRAL_URL=${CENTRAL_URL}
+      - AUTH_USER=${AUTH_USER}
+      - AUTH_PASS=${AUTH_PASS}
+    command: 
+      - "-config.file=/etc/promtail/config.yml"
+      - "-config.expand-env=true"
     volumes:
       - ./promtail-config.yml:/etc/promtail/config.yml:ro
       - /var/log:/var/log:ro
