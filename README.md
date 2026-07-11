@@ -246,29 +246,6 @@ docker compose up -d --remove-orphans
 
 ---
 
-## 📝 Changelog
-
-| Version | Date       | Changes |
-|---------|------------|---------|
-| `1.2.0` | 2026-07-06 | Upgraded Loki to v3.x configuration, simplified Loki configurations removing deprecated options, removed Loki container healthcheck to resolve startup loops, adjusted Nginx dependencies to start Loki services correctly, added pre-provisioned Node Exporter Full dashboard (ID: 1860), and documented custom dashboard management guide. |
-| `1.1.0` | 2026-07-06 | Simplified UFW comments to prevent syntax parsing errors, added automatic self-signed SSL fallback for IP-based local testing, updated all stack images to `latest`, and exposed UI/metrics ports publicly. |
-| `1.0.0` | 2026-07-05 | Initial release with centralized Mother Server stack, auto-provisioned dashboards, and standalone Hostinger / Server 3 agents |
-
----
-
-## 📄 License
-
-MIT
-
----
-
-## 👤 Author
-
-**mdrezaulkarim**
-- Website: [mdrezaulkarim.com](https://mdrezaulkarim.com)
-
----
-
 ## 📊 Troubleshooting & Verification Walkthrough
 
 This section details the setup of the Let's Encrypt SSL script on the Mother Server and the troubleshooting steps taken to successfully start and verify the agents on the Child Server.
@@ -340,3 +317,26 @@ The central Grafana dashboard confirms that both `mother-server` and `skylearn36
 Resource usage metrics (such as Memory and CPU %) from individual containers on `skylearn360` are being scraped and visualized correctly:
 
 ![Grafana Docker Overview](images/grafana_docker_overview.png)
+
+---
+
+## 📝 Changelog
+
+| Version | Date       | Changes |
+|---------|------------|---------|
+| `0.2.0` | 2026-07-06 | Upgraded Loki to v3.x configuration, simplified Loki configurations removing deprecated options, removed Loki container healthcheck to resolve startup loops, adjusted Nginx dependencies to start Loki services correctly, added pre-provisioned Node Exporter Full dashboard (ID: 1860), and documented custom dashboard management guide. |
+| `0.1.0` | 2026-07-06 | Simplified UFW comments to prevent syntax parsing errors, added automatic self-signed SSL fallback for IP-based local testing, updated all stack images to `latest`, and exposed UI/metrics ports publicly. |
+| `0.0.0` | 2026-07-05 | Initial release with centralized Mother Server stack, auto-provisioned dashboards, and standalone Hostinger / Server 3 agents |
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+## 👤 Author
+
+**mdrezaulkarim**
+- Website: [mdrezaulkarim.com](https://mdrezaulkarim.com)
