@@ -74,3 +74,104 @@ groups:
         annotations:
           summary: "Network errors on {{ $labels.server }}"
           description: "Interface {{ $labels.device }} on {{ $labels.server }} is seeing {{ $value | printf \"%.1f\" }} errors/sec."
+
+      # ── CPU usage above 90% ─────────────────────────────────────────
+      - alert: HostHighCpuUsage
+        expr: >
+          100 - (avg by(server) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CPU usage above 90% on {{ $labels.server }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% on {{ $labels.server }} for more than 5 minutes."
+
+      # ── Swap usage above 50% ────────────────────────────────────────
+      - alert: HostSwapUsage
+        expr: >
+          (node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes) / node_memory_SwapTotal_bytes * 100 > 50
+          and node_memory_SwapTotal_bytes > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High swap usage on {{ $labels.server }}"
+          description: "Swap is {{ $value | printf \"%.1f\" }}% used on {{ $labels.server }}. System may be running low on physical memory."
+
+      # ── Disk read/write latency high ────────────────────────────────
+      - alert: HostHighDiskLatency
+        expr: >
+          rate(node_disk_read_time_seconds_total[5m]) / rate(node_disk_reads_completed_total[5m]) > 0.1
+          or rate(node_disk_write_time_seconds_total[5m]) / rate(node_disk_writes_completed_total[5m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk I/O latency on {{ $labels.server }}"
+          description: "Disk {{ $labels.device }} on {{ $labels.server }} has average I/O latency above 100ms."
+
+      # ── System clock skew ───────────────────────────────────────────
+      - alert: HostClockSkew
+        expr: >
+          abs(node_timex_offset_seconds) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Clock skew detected on {{ $labels.server }}"
+          description: "System clock on {{ $labels.server }} is off by {{ $value | printf \"%.3f\" }} seconds. NTP may not be syncing."
+
+      # ── OOM Kill detected ───────────────────────────────────────────
+      - alert: HostOomKillDetected
+        expr: >
+          increase(node_vmstat_oom_kill[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "OOM kill detected on {{ $labels.server }}"
+          description: "An Out-Of-Memory kill occurred on {{ $labels.server }}. A process was terminated due to insufficient memory."
+
+      # ── Host rebooted recently ──────────────────────────────────────
+      - alert: HostRebootDetected
+        expr: >
+          node_time_seconds - node_boot_time_seconds < 600
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host {{ $labels.server }} rebooted recently"
+          description: "{{ $labels.server }} was rebooted less than 10 minutes ago."
+
+      # ── Disk usage above 95% (Critical) ─────────────────────────────
+      - alert: HostDiskCriticallyFull
+        expr: >
+          (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 95
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk critically full on {{ $labels.server }}"
+          description: "{{ $labels.mountpoint }} is {{ $value | printf \"%.1f\" }}% full on {{ $labels.server }}. Immediate action required!"
+
+      # ── Memory usage above 95% (Critical) ───────────────────────────
+      - alert: HostCriticalMemoryUsage
+        expr: >
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical memory usage on {{ $labels.server }}"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}% on {{ $labels.server }}. Risk of OOM kills."
+
+      # ── Inodes running low ──────────────────────────────────────────
+      - alert: HostInodesAlmostFull
+        expr: >
+          (1 - (node_filesystem_files_free{fstype!~"tmpfs|overlay"} / node_filesystem_files{fstype!~"tmpfs|overlay"})) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Inodes almost exhausted on {{ $labels.server }}"
+          description: "{{ $labels.mountpoint }} on {{ $labels.server }} has {{ $value | printf \"%.1f\" }}% inodes used. New files cannot be created when inodes are exhausted."

@@ -1,0 +1,84 @@
+# ─── Prometheus Alerting Rules: Service-Level (Monitoring Stack) ───────
+# These rules monitor the health of the monitoring infrastructure itself.
+# Ensures Prometheus, Loki, Grafana, and Nginx are healthy and operational.
+
+groups:
+  - name: service_alerts
+    rules:
+
+      # ── Prometheus scrape target is down ─────────────────────────────
+      - alert: PrometheusTargetDown
+        expr: >
+          up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Scrape target {{ $labels.job }} is down on {{ $labels.server }}"
+          description: "Prometheus cannot scrape {{ $labels.instance }} (job: {{ $labels.job }}) on {{ $labels.server }} for more than 5 minutes."
+
+      # ── Prometheus too many restarts ─────────────────────────────────
+      - alert: PrometheusTooManyRestarts
+        expr: >
+          changes(process_start_time_seconds{job=~".*prometheus.*"}[30m]) > 2
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus is restarting frequently on {{ $labels.server }}"
+          description: "Prometheus has restarted {{ $value }} times in the last 30 minutes on {{ $labels.server }}."
+
+      # ── Prometheus config reload failed ──────────────────────────────
+      - alert: PrometheusConfigReloadFailed
+        expr: >
+          prometheus_config_last_reload_successful == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus config reload failed on {{ $labels.server }}"
+          description: "Prometheus on {{ $labels.server }} failed to reload its configuration. Check for syntax errors in prometheus.yml or alert rules."
+
+      # ── Prometheus TSDB compaction failures ──────────────────────────
+      - alert: PrometheusTsdbCompactionsFailing
+        expr: >
+          increase(prometheus_tsdb_compactions_failed_total[6h]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus TSDB compaction failures on {{ $labels.server }}"
+          description: "Prometheus TSDB on {{ $labels.server }} has had {{ $value }} compaction failures in the last 6 hours. This may indicate disk issues."
+
+      # ── Alertmanager notification failures ───────────────────────────
+      - alert: AlertmanagerNotificationFailing
+        expr: >
+          rate(alertmanager_notifications_failed_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alertmanager failing to send notifications on {{ $labels.server }}"
+          description: "Alertmanager on {{ $labels.server }} is failing to deliver notifications via {{ $labels.integration }}. Check the webhook URL configuration."
+
+      # ── Prometheus WAL corruptions ───────────────────────────────────
+      - alert: PrometheusWalCorruptions
+        expr: >
+          increase(prometheus_tsdb_wal_corruptions_total[1h]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus WAL corruption detected on {{ $labels.server }}"
+          description: "Prometheus Write-Ahead Log on {{ $labels.server }} has {{ $value }} corruption(s) in the last hour. Data loss may have occurred."
+
+      # ── High query load on Prometheus ────────────────────────────────
+      - alert: PrometheusHighQueryLoad
+        expr: >
+          rate(prometheus_engine_query_duration_seconds_sum[5m]) > 30
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High query load on Prometheus {{ $labels.server }}"
+          description: "Prometheus on {{ $labels.server }} is spending {{ $value | printf \"%.1f\" }} seconds per second on queries. Dashboard queries may be too heavy."

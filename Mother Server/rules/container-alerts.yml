@@ -50,3 +50,38 @@ groups:
         annotations:
           summary: "Container {{ $labels.name }} stopped on {{ $labels.server }}"
           description: "Container {{ $labels.name }} on {{ $labels.server }} has not been seen for 10 minutes."
+
+      # ── Container CPU throttling ────────────────────────────────────
+      - alert: ContainerCpuThrottling
+        expr: >
+          rate(container_cpu_cfs_throttled_seconds_total{name!=""}[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} is being CPU throttled on {{ $labels.server }}"
+          description: "Container {{ $labels.name }} on {{ $labels.server }} is being throttled {{ $value | printf \"%.2f\" }}s per second."
+
+      # ── Container network receive errors ────────────────────────────
+      - alert: ContainerNetworkErrors
+        expr: >
+          rate(container_network_receive_errors_total{name!=""}[5m]) > 5
+          or rate(container_network_transmit_errors_total{name!=""}[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Network errors on container {{ $labels.name }} on {{ $labels.server }}"
+          description: "Container {{ $labels.name }} on {{ $labels.server }} is experiencing network errors."
+
+      # ── Container high network I/O ──────────────────────────────────
+      - alert: ContainerHighNetworkIO
+        expr: >
+          rate(container_network_receive_bytes_total{name!=""}[5m]) > 100 * 1024 * 1024
+          or rate(container_network_transmit_bytes_total{name!=""}[5m]) > 100 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High network I/O on container {{ $labels.name }} on {{ $labels.server }}"
+          description: "Container {{ $labels.name }} on {{ $labels.server }} is transferring more than 100MB/s."
