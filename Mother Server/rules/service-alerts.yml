@@ -82,3 +82,47 @@ groups:
         annotations:
           summary: "High query load on Prometheus {{ $labels.server }}"
           description: "Prometheus on {{ $labels.server }} is spending {{ $value | printf \"%.1f\" }} seconds per second on queries. Dashboard queries may be too heavy."
+
+      # ── Prometheus Rule Evaluation Failures ──────────────────────────
+      - alert: PrometheusRuleEvaluationFailures
+        expr: >
+          increase(prometheus_rule_evaluation_failures_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus rule evaluation failing on {{ $labels.server }}"
+          description: "Prometheus is failing to evaluate alerting or recording rules on {{ $labels.server }}."
+
+      # ── Prometheus Rule Evaluation Slow ──────────────────────────────
+      - alert: PrometheusRuleEvaluationSlow
+        expr: >
+          prometheus_rule_group_last_duration_seconds > prometheus_rule_group_interval_seconds
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus rule evaluation slow on {{ $labels.server }}"
+          description: "Rule group {{ $labels.rule_group }} on {{ $labels.server }} took {{ $value | printf \"%.1f\" }}s to evaluate, which is longer than its configured interval."
+
+      # ── Prometheus Template Text Expansion Failures ──────────────────
+      - alert: PrometheusTemplateTextExpansionFailures
+        expr: >
+          increase(prometheus_template_text_expansion_failures_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus template expansion failed on {{ $labels.server }}"
+          description: "Alert template text expansion has failed on {{ $labels.server }}."
+
+      # ── Prometheus Notification Queue Full ───────────────────────────
+      - alert: PrometheusNotificationQueueFull
+        expr: >
+          prometheus_notifications_queue_length > 100
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus notification queue full on {{ $labels.server }}"
+          description: "Prometheus alert notification queue length is {{ $value }} on {{ $labels.server }}. Alerts may be delayed or dropped."
