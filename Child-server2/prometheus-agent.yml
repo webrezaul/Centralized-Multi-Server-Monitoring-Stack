@@ -23,4 +23,3 @@ remote_write:
     queue_config:
       max_samples_per_send: 5000
       batch_send_deadline: 5s
-      max_retries: 10
